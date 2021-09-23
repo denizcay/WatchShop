@@ -1,9 +1,6 @@
 ﻿using ApplicationCore.Entities;
 using Ardalis.Specification;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ApplicationCore.Interfaces
@@ -19,6 +16,5 @@ namespace ApplicationCore.Interfaces
         Task CountAsync(ISpecification<T> spec);
         Task<T> FirstAsync(ISpecification<T> spec);
         Task<T> FirstOrDefaultAsync(ISpecification<T> spec);
-
     }
 }
