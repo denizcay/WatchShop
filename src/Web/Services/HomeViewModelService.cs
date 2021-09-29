@@ -1,5 +1,9 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Specifications;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Web.Interfaces;
@@ -10,15 +14,25 @@ namespace Web.Services
     public class HomeViewModelService : IHomeViewModelService
     {
         private readonly IAsyncRepository<Product> productRepository;
+        private readonly IAsyncRepository<Category> categoryRepository;
+        private readonly IAsyncRepository<Brand> brandRepository;
 
-        public HomeViewModelService(IAsyncRepository<Product> productRepository)
+        public HomeViewModelService(IAsyncRepository<Product> productRepository, IAsyncRepository<Category> categoryRepository, IAsyncRepository<Brand> brandRepository)
         {
             this.productRepository = productRepository;
+            this.categoryRepository = categoryRepository;
+            this.brandRepository = brandRepository;
         }
 
-        public async Task<HomeViewModel> GetHomeViewModelAsync()
+        public async Task<HomeViewModel> GetHomeViewModelAsync(int? categoryId, int? brandId, int page)
         {
-            var products = await productRepository.ListAllAsync();
+            var specProducts = new ProductsFilterSpecification(categoryId, brandId);
+            var totalItemsCount = await productRepository.CountAsync(specProducts);
+            var totalPagesCount = (int)Math.Ceiling((decimal)totalItemsCount / Constants.ITEMS_PER_PAGE);
+            var specPaginatedProducts = new ProductsFilterPaginatedSpecification(categoryId, brandId, (page - 1) * Constants.ITEMS_PER_PAGE, Constants.ITEMS_PER_PAGE);
+
+            var products = await productRepository.ListAsync(specPaginatedProducts);
+
             var vm = new HomeViewModel()
             {
                 Products = products.Select(p => new ProductViewModel()
@@ -27,9 +41,34 @@ namespace Web.Services
                     ProductName = p.ProductName,
                     PicturePath = p.PicturePath,
                     Price = p.Price
-                }).ToList()
+                }).ToList(),
+                Categories = await GetCategoriesAsync(),
+                Brands = await GetBrandsAsync(),
+                CategoryId = categoryId,
+                BrandId = brandId,
+                PaginationInfo = new PaginationInfoViewModel()
+                {
+                    Page = page,
+                    TotalItems = totalItemsCount,
+                    TotalPages = totalPagesCount,
+                    ItemsOnPage = products.Count,
+                    HasPrevious = page > 1,
+                    HasNext = page < totalPagesCount
+                }
             };
             return vm;
+        }
+
+        private async Task<IEnumerable<SelectListItem>> GetBrandsAsync()
+        {
+            return (await brandRepository.ListAllAsync())
+                .Select(b => new SelectListItem(b.BrandName, b.Id.ToString()));
+        }
+
+        private async Task<IEnumerable<SelectListItem>> GetCategoriesAsync()
+        {
+            return (await categoryRepository.ListAllAsync())
+                .Select(c => new SelectListItem(c.CategoryName, c.Id.ToString()));
         }
     }
 }
