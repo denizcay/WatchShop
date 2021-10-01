@@ -17,7 +17,7 @@ namespace ApplicationCore.Services
 
         public BasketService(IAsyncRepository<Basket> basketRepository, IAsyncRepository<BasketItem> basketItemRepository)
         {
-           _basketRepository = basketRepository;
+            _basketRepository = basketRepository;
             _basketItemRepository = basketItemRepository;
         }
         public async Task AddItemToBasketAsync(int basketId, int productId, int quantity)
@@ -52,7 +52,6 @@ namespace ApplicationCore.Services
         {
             var spec = new BasketItemsSpecification(basketId);
             return _basketItemRepository.CountAsync(spec);
-
         }
     }
 }
