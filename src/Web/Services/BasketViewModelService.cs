@@ -102,9 +102,21 @@ namespace Web.Services
             var vm = new BasketViewModel();
             if (!basketId.HasValue) return vm;
 
-            // TODO: sepeti ögeleryile döndür
+            // basket with items
+            var spec = new BasketWithItemsAndProductsSpecification(basketId.Value);
+            var basket = await _basketRepository.FirstOrDefaultAsync(spec);
+            vm.Items = basket.Items.Select(x => new BasketItemViewModel()
+            {
+                Id = x.Id,
+                ProductId = x.Product.Id,
+                PicturePath = x.Product.PicturePath,
+                ProductName = x.Product.ProductName,
+                Price = x.Product.Price,
+                Quantity = x.Quantity
+            }).ToList();
+            vm.TotalPrice = vm.Items.Sum(x => x.Quantity * x.Price);
 
-            return null;
+            return vm;
         }
 
         public async Task<int?> GetBasketIdAsync()
