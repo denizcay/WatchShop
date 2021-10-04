@@ -90,3 +90,7 @@ body {
 .product-image:hover{
     padding: 0.2rem;
 }
+
+.number-input > .quantity{
+    width : 70px;
+}
