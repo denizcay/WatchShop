@@ -94,5 +94,10 @@ namespace ApplicationCore.Services
 
             return basket;
         }
+
+        public async Task TransferBasketAsync(int fromBuyerId, int toBuyerId)
+        {
+            // TODO: get from buyer basket 
+        }
     }
 }
