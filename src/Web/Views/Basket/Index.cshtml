@@ -1,6 +1,11 @@
 ﻿@model BasketViewModel
 @{
     ViewBag.Title = "Basket";
+    string message = null;
+    if ((string)TempData["result"] == "UpdateSuccess")
+        message = "The basket has been updated successfully.";
+    else if ((string)TempData["result"] == "RemoveSuccess")
+        message = "The item has been removed successfully.";
 }
 
 <!--Section: Block Content-->
@@ -19,9 +24,26 @@
 
                         <div class="d-flex justify-content-between align-items-baseline">
                             <h5 class="mb-4">Cart (<span>@Model.Items.Count</span> items)</h5>
-                            <button class="btn btn-sm btn-success">Update Cart</button>
+                            <div>
+                                <a href="#" class="btn btn-sm btn-danger" onclick="emptyCart()">Empty Cart</a>
+                                <button class="btn btn-sm btn-success ml-2">Update Cart</button>
+                            </div>
+                            
                         </div>
 
+                        @if (Model.Items.Count == 0)
+                        {
+                            <div class="card">
+                                <div class="card-body text-center py-5">
+                                    <div>
+                                        <i class="fas fa-shopping-basket empty-basket-icon"></i>
+                                    </div>
+                                    <p class="mt-1">
+                                        Your cart is empty.
+                                    </p>
+                                </div>
+                            </div>
+                        }
                         @foreach (var item in Model.Items)
                         {
                             <input type="hidden" name="id" value="@item.Id" />
@@ -47,7 +69,7 @@
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
-                                                <a href="#!" type="button" class="card-link-secondary small text-uppercase mr-3">
+                                                <a href="#!" type="button" class="card-link-secondary small text-uppercase mr-3" onclick="removeItem(@item.Id)">
                                                     <i class="fas fa-trash-alt mr-1"></i> Remove item
                                                 </a>
                                                 <a href="#!" type="button" class="card-link-secondary small text-uppercase">
@@ -108,3 +130,28 @@
 </form>
 
 <!--Section: Block Content-->
+
+<form id="frmRemoveItem" asp-controller="Basket" asp-action="RemoveItem" method="post">
+    <input id="basketItemId" type="hidden" value="" name="basketItemId" />
+</form>
+
+<form id="frmDelete" asp-controller="Basket" asp-action="Delete" method="post">
+</form>
+
+@section Scripts{
+    <script>
+        function removeItem(itemId) {
+            $("#basketItemId").val(itemId);
+            $("#frmRemoveItem").submit();
+        }
+
+        function emptyCart() {
+            $("#frmDelete").submit();
+        }
+
+        var message = "@message";
+
+        if (message)
+            toastr.success(message, "Success", { positionClass: "toast-bottom-right" });
+    </script>
+}

@@ -22,14 +22,11 @@ namespace ApplicationCore.Services
         }
         public async Task AddItemToBasketAsync(int basketId, int productId, int quantity)
         {
-            // Sepeti ögeleriyle getirme:
-            var spec = new BasketWithItemsSpecification(basketId);
-            Basket basket = await _basketRepository.FirstOrDefaultAsync(spec);
+            if (quantity < 1)
+                throw new ArgumentOutOfRangeException("Quantity must be a positive number");
+    
+            var basket = await GetBasketWithItemsAsync(basketId);
 
-            if (basket == null)
-                throw new BasketNotFoundException(basketId);
-
-            // Ögelerinde ürün varsa adedini arttırma:
             BasketItem item = basket.Items.FirstOrDefault(x => x.ProductId == productId);
 
             if (item != null)
@@ -54,9 +51,48 @@ namespace ApplicationCore.Services
             return _basketItemRepository.CountAsync(spec);
         }
 
+        public async Task DeleteBasketAsync(int basketId)
+        {
+            var basket = await GetBasketWithItemsAsync(basketId);
+
+            await _basketRepository.DeleteAsync(basket);
+        }
+
         public async Task SetQuantities(int basketId, Dictionary<int, int> quantites)
         {
-            // TODO: Get basket and update items 
+            // Get basket and update items 
+            var basket = await GetBasketWithItemsAsync(basketId);
+
+            foreach (var item in basket.Items)
+            {
+                int newValue;
+             
+                if (quantites.TryGetValue(item.Id, out newValue))
+                {
+                    if (newValue < 1)
+                        throw new ArgumentOutOfRangeException("Quantity must be a positive number");
+                    item.Quantity = newValue;
+                }
+            }
+
+            await _basketRepository.UpdateAsync(basket);
+        }
+        public async Task RemoveBasketItemAsync(int basketId, int basketItemId)
+        {
+            var basket = await GetBasketWithItemsAsync(basketId);
+            basket.Items.RemoveAll(x => x.Id == basketItemId);
+            await _basketRepository.UpdateAsync(basket);
+        }
+
+        private async Task<Basket> GetBasketWithItemsAsync(int basketId)
+        {
+            var spec = new BasketWithItemsSpecification(basketId);
+            Basket basket = await _basketRepository.FirstOrDefaultAsync(spec);
+
+            if (basket == null)
+                throw new BasketNotFoundException(basketId);
+
+            return basket;
         }
     }
 }

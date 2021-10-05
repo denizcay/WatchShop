@@ -94,3 +94,7 @@ body {
 .number-input > .quantity{
     width : 70px;
 }
+
+.empty-basket-icon{
+    font-size: 48px;
+}
