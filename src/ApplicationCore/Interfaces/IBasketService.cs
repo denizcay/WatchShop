@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ApplicationCore.Interfaces
@@ -13,6 +10,6 @@ namespace ApplicationCore.Interfaces
         Task SetQuantities(int basketId, Dictionary<int, int> quantites);
         Task RemoveBasketItemAsync(int basketId, int basketItemId);
         Task DeleteBasketAsync(int basketId);
-        Task TransferBasketAsync(int fromBuyerId, int toBuyerId);
+        Task TransferBasketAsync(string fromBuyerId, string toBuyerId);
     }
 }
