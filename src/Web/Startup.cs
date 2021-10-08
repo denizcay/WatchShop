@@ -26,8 +26,8 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<AppIdentityDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("AppIdentityDbContext")));
-            services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("ApplicationDbContext")));
+            services.AddDbContext<AppIdentityDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("AppIdentityDbContext")));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ApplicationDbContext")));
             // Belirli bir türle T IAsyncRepository generic olarak talep edildiðinde ayný türle EFRepository<T> hizmeti enjekte edilecektir.
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EFRepository<>));
             services.AddDatabaseDeveloperPageExceptionFilter();
